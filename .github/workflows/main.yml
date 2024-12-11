@@ -1,10 +1,11 @@
 name: Build .NET 4.8 App
-
+permissions:
+  contents: write
 on:
   push:
     branches:
       - master
-    tags: 
+    tags:
       - "*"
   pull_request:
     branches:
@@ -17,37 +18,37 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Checkout dll repo
         run: git clone https://github.com/CrystalMarble/dllrepo
       - name: Copy Ultra dlls
         run: |
-          tree /F
-          copy dllrepo/ultra/* ExampleMod/Libraries/
+          mkdir -Force OldMods/Libraries
+          copy dllrepo/ultra/* OldMods/Libraries/
       - name: Download 0Harmony
         run: |
           Invoke-WebRequest "https://github.com/pardeike/Harmony/releases/download/v2.3.3.0/Harmony-Fat.2.3.3.0.zip" -OutFile ./_Harmony.zip
           mkdir _Harmony
           Expand-Archive -LiteralPath ./_Harmony.zip -DestinationPath ./_Harmony/
-          copy ./_Harmony/net48/0Harmony.dll ./ExampleMod/Libraries/
+          copy ./_Harmony/net48/0Harmony.dll ./OldMods/Libraries/
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
         with:
-          nuget-version: "latest" 
+          nuget-version: "latest"
 
       - name: Build Solution
-        run: msbuild ./ExampleMod/ExampleMod.csproj /p:Configuration=Release
+        run: msbuild ./OldMods/OldMods.csproj /p:Configuration=Release
       - name: Copy necessary files to release
         run: |
           mkdir Release
-          copy ./ExampleMod/bin/Release/ExampleMod.* Release/
+          copy ./OldMods/bin/Release/OldMods.* Release/
       - name: Publish Build Artifacts
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ExampleMod
+          name: OldMods
           path: Release
   release:
     needs: build
@@ -59,27 +60,18 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: build-artifacts
-
-      - name: Create Release
-        uses: actions/create-release@v1
+          name: OldMods
+          path: Release
+      - name: ZIPs the contents
+        uses: TheDoctor0/zip-release@0.7.1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          body: |
-            Automated release for ${{ github.ref_name }}.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+          filename: "OldMods.zip"
+          directory: Release
+      - name: Create Relese
+        uses: ncipollo/release-action@v1.10.0
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ExampleMod/bin/Release/
-          asset_name: ExampleMod-${{ github.ref_name }}.zip
-          asset_content_type: application/zip
-
+          artifacts: "Release/*.zip"
+          tag: "${{ github.ref_name }}"
+          name: "OldMods-${{ github.ref_name }}"
