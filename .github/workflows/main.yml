@@ -28,6 +28,8 @@ jobs:
           mkdir _Harmony
           Expand-Archive -LiteralPath ./_Harmony.zip -DestinationPath ./_Harmony/
           copy ./_Harmony/net48/0Harmony.dll ./ExampleMod/Libraries/
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
         with:
