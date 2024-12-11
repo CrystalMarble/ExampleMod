@@ -22,6 +22,7 @@ jobs:
           repository: CrystalMarble/dllrepo
       - name: Copy Ultra dlls
         run: |
+          tree /F
           copy dllrepo/ultra/* ExampleMod/Libraries/
       - name: Download 0Harmony
         run: |
