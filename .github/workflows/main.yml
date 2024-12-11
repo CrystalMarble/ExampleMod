@@ -17,9 +17,7 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Checkout dll repo
-        uses: actions/checkout@v3
-        with: 
-          repository: CrystalMarble/dllrepo
+        run: git clone https://github.com/CrystalMarble/dllrepo
       - name: Copy Ultra dlls
         run: |
           tree /F
