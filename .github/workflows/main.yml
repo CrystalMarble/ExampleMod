@@ -37,10 +37,13 @@ jobs:
 
       - name: Build Solution
         run: msbuild ./ExampleMod/ExampleMod.csproj /p:Configuration=Release
-
+      - name: Copy necessary files to release
+        run: |
+          mkdir Release
+          copy ./ExampleMod/bin/Release/ExampleMod.* Release/
       - name: Publish Build Artifacts
         if: success()
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
-          path: ./ExampleMod/bin/Release/
+          name: ExampleMod
+          path: Release
