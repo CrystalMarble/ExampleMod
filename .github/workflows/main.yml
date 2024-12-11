@@ -1,0 +1,47 @@
+name: Build .NET 4.8 App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Checkout dll repo
+        uses: actions/checkout@v3
+        with: 
+          repository: CrystalMarble/dllrepo
+      - name: Copy Ultra dlls
+        run: |
+          copy dllrepo/ultra/* ExampleMod/Libraries/
+      - name: Download 0Harmony
+        run: |
+          Invoke-WebRequest "https://github.com/pardeike/Harmony/releases/download/v2.3.3.0/Harmony-Fat.2.3.3.0.zip" -OutFile ./_Harmony.zip
+          mkdir _Harmony
+          Expand-Archive -LiteralPath ./_Harmony.zip -DestinationPath ./_Harmony/
+          copy ./_Harmony/net48/0Harmony.dll ./ExampleMod/Libraries/
+          
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v3
+
+      - name: Restore NuGet packages
+        run: nuget restore ./ExampleMod.sln
+
+      - name: Build Solution
+        run: msbuild ./ExampleMod.sln /p:Configuration=Release
+
+      - name: Publish Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: ./ExampleMod/bin/Release/
