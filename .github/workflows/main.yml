@@ -28,9 +28,6 @@ jobs:
           mkdir _Harmony
           Expand-Archive -LiteralPath ./_Harmony.zip -DestinationPath ./_Harmony/
           copy ./_Harmony/net48/0Harmony.dll ./ExampleMod/Libraries/
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '4.8.x'
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
         with:
