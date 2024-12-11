@@ -33,11 +33,8 @@ jobs:
         with:
           nuget-version: "latest" 
 
-      - name: Restore NuGet packages
-        run: nuget restore ./ExampleMod.sln
-
       - name: Build Solution
-        run: msbuild ./ExampleMod.sln /p:Configuration=Release
+        run: msbuild ./ExampleMod/ExampleMod.csproj /p:Configuration=Release
 
       - name: Publish Build Artifacts
         if: success()
